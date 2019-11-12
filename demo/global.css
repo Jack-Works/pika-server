@@ -1,0 +1,6 @@
+* {
+    background: black;
+}
+*::after {
+    content: '\`';
+}
