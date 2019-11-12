@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import Koa from 'koa'
 import KoaStatic from 'koa-static'
 import { ReadStream } from 'fs'
@@ -5,8 +6,10 @@ import { Loaders } from './Loaders'
 
 import CSSLoader from './Loaders/CSSModule'
 import JSONLoader from './Loaders/JSONModule'
+import TSLoader from './Loaders/TypeScript'
 Loaders.add(CSSLoader)
 Loaders.add(JSONLoader)
+Loaders.add(TSLoader)
 
 const app = new Koa()
 
