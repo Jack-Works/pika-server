@@ -7,9 +7,11 @@ import { Loaders } from './Loaders'
 import CSSLoader from './Loaders/CSSModule'
 import JSONLoader from './Loaders/JSONModule'
 import TSLoader from './Loaders/TypeScript'
+import MarkdownLoader from './Loaders/MarkdownLoader'
 Loaders.add(CSSLoader)
 Loaders.add(JSONLoader)
 Loaders.add(TSLoader)
+Loaders.add(MarkdownLoader)
 
 const app = new Koa()
 

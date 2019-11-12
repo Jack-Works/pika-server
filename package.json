@@ -29,13 +29,17 @@
   },
   "homepage": "https://github.com/Jack-Works/pika-server#readme",
   "dependencies": {
-    "@types/koa": "^2.0.52",
-    "@types/koa-static": "^4.0.1",
     "koa": "^2.11.0",
-    "koa-static": "^5.0.0",
-    "typescript": "^3.7.2"
+    "koa-static": "^5.0.0"
   },
   "bin": {
     "pikasrv": "./dist/index.js"
+  },
+  "devDependencies": {
+    "@types/koa": "^2.0.52",
+    "@types/koa-static": "^4.0.1",
+    "@types/markdown-it": "0.0.9",
+    "markdown-it": "^10.0.0",
+    "typescript": "^3.7.2"
   }
 }

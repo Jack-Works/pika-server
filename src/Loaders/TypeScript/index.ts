@@ -1,5 +1,5 @@
 import { Loader } from '..'
-import { importGlobal } from '../../utils'
+import { importGlobal } from '../../utils/import'
 
 export default {
     // Yes but sad.

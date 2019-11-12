@@ -10,6 +10,7 @@ export function importGlobal<T>(src: string): Promise<T> {
     return import(src)
         .catch(() => resolveNPM(src))
         .catch(() => resolveYarn(src))
+        .then(x => x.default || x)
 }
 
 async function resolveNPM(_: string) {
