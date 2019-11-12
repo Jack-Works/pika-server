@@ -4,7 +4,7 @@ import { importGlobal } from '../../utils/import'
 export default {
     // Yes but sad.
     canHandle: 'video/mp2t',
-    transformESModule: async source => {
+    transformESModule: async (source, ctx) => {
         try {
             const ts = await importGlobal<typeof import('typescript')>('typescript')
             const result = ts.transpileModule(source, {
@@ -16,6 +16,7 @@ export default {
                     inlineSources: true,
                     inlineSourceMap: true,
                 },
+                fileName: ctx.originalUrl,
             })
             return result.outputText
         } catch (e) {

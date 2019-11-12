@@ -39,6 +39,7 @@
     "@types/koa": "^2.0.52",
     "@types/koa-static": "^4.0.1",
     "@types/markdown-it": "0.0.9",
+    "coffeescript": "^2.4.1",
     "markdown-it": "^10.0.0",
     "typescript": "^3.7.2"
   }
