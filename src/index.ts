@@ -4,14 +4,14 @@ import KoaStatic from 'koa-static'
 import { ReadStream } from 'fs'
 import { Loaders } from './Loaders'
 
-import CSSLoader from './Loaders/CSSModule'
 import JSONLoader from './Loaders/JSONModule'
-import TSLoader from './Loaders/TypeScript'
 import MarkdownLoader from './Loaders/MarkdownLoader'
-import CoffeeScript from './Loaders/CoffeeScript'
-Loaders.add(CSSLoader)
+import CSSModule from './Loaders/CSS-Like/CSSModule'
+import TypeScript from './Loaders/JavaScript-Like/TypeScript'
+import CoffeeScript from './Loaders/JavaScript-Like/CoffeeScript'
+Loaders.add(CSSModule)
 Loaders.add(JSONLoader)
-Loaders.add(TSLoader)
+Loaders.add(TypeScript)
 Loaders.add(MarkdownLoader)
 Loaders.add(CoffeeScript)
 

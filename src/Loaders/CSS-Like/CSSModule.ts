@@ -1,4 +1,4 @@
-import { Loader } from '.'
+import { Loader } from '..'
 
 export default {
     canHandle: 'text/css',
