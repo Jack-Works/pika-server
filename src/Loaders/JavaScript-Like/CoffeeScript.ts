@@ -5,12 +5,11 @@ export default {
     canHandle: 'text/coffeescript',
     async transformESModule(source, req) {
         try {
-            // @ts-ignore
             const coffee = await importGlobal<CoffeeAPI>('coffeescript')
             const x = coffee.compile(source, { inlineMap: true, sourceMap: true, filename: req.path })
             return x.js
         } catch {
-            return 'To transform CoffeeScript into ESModule, install a "coffeescript" package'
+            return source + `\nconsole.warn('to transform CoffeeScript, install the coffeescript package')`
         }
     },
 } as Loader
