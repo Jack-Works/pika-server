@@ -38,10 +38,17 @@
   "devDependencies": {
     "@types/koa": "^2.0.52",
     "@types/koa-static": "^4.0.1",
+    "@types/less": "^3.0.1",
     "@types/markdown-it": "0.0.9",
+    "@types/sass": "^1.16.0",
+    "@types/stylus": "^0.48.31",
     "coffeescript": "^2.4.1",
     "flow-remove-types": "^2.112.0",
+    "less": "^3.10.3",
     "markdown-it": "^10.0.0",
+    "sass": "^1.23.3",
+    "scss": "^0.2.4",
+    "stylus": "^0.54.7",
     "typescript": "^3.7.2"
   }
 }

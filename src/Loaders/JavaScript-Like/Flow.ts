@@ -21,7 +21,7 @@ export default {
             return (
                 result.toString() +
                 `
-//# sourceMappingURL=data:application/json;base64,${Buffer.from(JSON.stringify(sourceMap)).toString('base64')}`
+//# sourceMappingURL=data:application/json;base64,${btoa(JSON.stringify(sourceMap))}`
             )
         } catch (e) {
             return `export default undefined; throw new TypeError("To transform flow.js, install the flow-remote-types package\\n${e.message}")`
