@@ -25,4 +25,8 @@ throw new TypeError('To import TypeScript directly, you should install a TypeScr
 export default undefined`
         }
     },
+    redirectHandler(type, path) {
+        if (type !== 'script') return []
+        return [path + '.tsx', path + '.ts', path + '/index.tsx', path + '/index.ts']
+    },
 } as Loader

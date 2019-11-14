@@ -27,6 +27,10 @@ export default {
             return `export default undefined; throw new TypeError("To transform flow.js, install the flow-remote-types package\\n${e.message}")`
         }
     },
+    redirectHandler(type, path) {
+        if (type !== 'script') return []
+        return [path + '.js', path + '/index.js']
+    },
 } as Loader
 type FlowAPI = {
     (source: string, options?: Partial<{ all: boolean; pretty: boolean }>): {

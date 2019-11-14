@@ -4,6 +4,7 @@ export interface Loader {
     transformESModule?: (source: string, req: Koa.Request) => string | Promise<string>
     transformHTML?: (source: string, req: Koa.Request) => string | Promise<string>
     transformStyle?: (source: string, req: Koa.Request) => string | Promise<string>
+    redirectHandler?: (type: 'script' | 'document' | 'style', notFoundPath: string) => string[]
 }
 
 export const Loaders = new Set<Loader>()

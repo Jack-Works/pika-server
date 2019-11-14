@@ -56,7 +56,30 @@ app.use(async (ctx, next) => {
         }
     }
 })
-app.use(KoaStatic('./demo/', { hidden: true }))
+
+const demoPath = './demo/'
+
+app.use(KoaStatic(demoPath, { hidden: true }))
+
+import { exists } from 'fs'
+import { promisify } from 'util'
+import { join } from 'path'
+const exist = promisify(exists)
+app.use(async (ctx, next) => {
+    if (ctx.response.status === 404) {
+        const secFetchDest: any = ctx.headers['sec-fetch-dest']
+        searching: for (const loader of Loaders) {
+            if (!loader.redirectHandler) continue
+            for (const path of loader.redirectHandler(secFetchDest, ctx.path)) {
+                if (await exist(join(demoPath, path))) {
+                    ctx.redirect(path)
+                    break searching
+                }
+            }
+        }
+    }
+    return next()
+})
 
 app.listen(3000)
 

@@ -12,6 +12,10 @@ export default {
             return source + `\nconsole.warn('to transform CoffeeScript, install the coffeescript package')`
         }
     },
+    redirectHandler(type, path) {
+        if (type !== 'script') return []
+        return [path + '.coffee']
+    },
 } as Loader
 type CoffeeAPI = {
     compile(
