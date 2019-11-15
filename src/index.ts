@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import Koa from 'koa'
 import KoaStatic from 'koa-static'
-import { Loaders } from './Loaders'
+import { Loaders, LoaderContext } from './Loaders'
 import { ReadStreamToString } from './utils/ReadStreamToString'
 
 import JSONLoader from './Loaders/JSONModule'
@@ -40,18 +40,26 @@ app.use(async (ctx, next) => {
             return source
         }
         if (await loader.canHandle(originalMineType, getSource)) {
+            const loaderCtx: LoaderContext = { serveBasePath: demoPath, originalUrl: ctx.originalUrl, path: ctx.path }
             if (secFetchDest === 'script' && loader.transformESModule) {
-                ctx.body = await loader.transformESModule(await getSource(), ctx.request)
+                ctx.body = await loader.transformESModule(await getSource(), loaderCtx)
                 ctx.response.type = '.js'
                 break
             } else if (secFetchDest === 'document' && loader.transformHTML) {
-                ctx.body = await loader.transformHTML(await getSource(), ctx.request)
+                ctx.body = await loader.transformHTML(await getSource(), loaderCtx)
                 ctx.response.type = '.html'
                 break
             } else if (secFetchDest === 'style' && loader.transformStyle) {
-                ctx.body = await loader.transformStyle(await getSource(), ctx.request)
+                ctx.body = await loader.transformStyle(await getSource(), loaderCtx)
                 ctx.response.type = '.css'
                 break
+            } else {
+                ctx.body = await getSource()
+            }
+        } else {
+            // @ts-ignore
+            if (typeof source !== 'undefined') {
+                ctx.body = source
             }
         }
     }
@@ -65,6 +73,9 @@ import { exists } from 'fs'
 import { promisify } from 'util'
 import { join } from 'path'
 const exist = promisify(exists)
+/**
+ * Re-resolve path like folder import
+ */
 app.use(async (ctx, next) => {
     if (ctx.response.status === 404) {
         const secFetchDest: any = ctx.headers['sec-fetch-dest']
@@ -81,7 +92,7 @@ app.use(async (ctx, next) => {
     return next()
 })
 
-app.listen(3000)
+app.listen({ port: 5000 })
 
 // Polyfill
 globalThis.btoa = (str: string) => Buffer.from(str).toString('base64')

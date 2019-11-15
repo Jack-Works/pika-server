@@ -20,7 +20,7 @@ export default {
                 },
                 fileName: ctx.originalUrl,
                 transformers: {
-                    after: [transformPath(ts)],
+                    after: [transformPath(ts, ctx.serveBasePath)],
                 },
             })
             return result.outputText
@@ -36,13 +36,13 @@ export default undefined`
     },
 } as Loader
 
-function transformPath(ts: typeof import('typescript')) {
+function transformPath(ts: typeof import('typescript'), basePath: string) {
     return (ctx: TransformationContext) => {
         return (sourceFile: SourceFile) => {
             function visitor(node: Node): Node {
                 if (ts.isImportDeclaration(node)) {
                     // transform `import ... from '...'
-                    const newPath = nodeStyleResolution((node.moduleSpecifier as StringLiteral).text)
+                    const newPath = nodeStyleResolution((node.moduleSpecifier as StringLiteral).text, basePath)
                     return ts.createImportDeclaration(
                         node.decorators,
                         node.modifiers,
@@ -52,7 +52,7 @@ function transformPath(ts: typeof import('typescript')) {
                 } else if (ts.isExportDeclaration(node)) {
                     // transform `export ... from '...'`
                     if (!node.moduleSpecifier) return node
-                    const newPath = nodeStyleResolution((node.moduleSpecifier as StringLiteral).text)
+                    const newPath = nodeStyleResolution((node.moduleSpecifier as StringLiteral).text, basePath)
                     return ts.createExportDeclaration(
                         node.decorators,
                         node.modifiers,
@@ -142,11 +142,11 @@ function transformPath(ts: typeof import('typescript')) {
                                 ),
                                 ts.createReturn(
                                     ts.createTemplateExpression(
-                                        ts.createTemplateHead('https://unpkg.com/', 'https://unpkg.com/'),
+                                        ts.createTemplateHead('/node_modules/', '/node_modules/'),
                                         [
                                             ts.createTemplateSpan(
                                                 ts.createIdentifier('path'),
-                                                ts.createTemplateTail('?module', '?module'),
+                                                ts.createTemplateTail('', ''),
                                             ),
                                         ],
                                     ),

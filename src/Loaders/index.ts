@@ -1,9 +1,15 @@
 import Koa from 'koa'
+
+export interface LoaderContext {
+    path: string
+    originalUrl: string
+    serveBasePath: string
+}
 export interface Loader {
     canHandle: string | ((mineType: string, getSource: () => Promise<string>) => Promise<boolean>)
-    transformESModule?: (source: string, req: Koa.Request) => string | Promise<string>
-    transformHTML?: (source: string, req: Koa.Request) => string | Promise<string>
-    transformStyle?: (source: string, req: Koa.Request) => string | Promise<string>
+    transformESModule?: (source: string, req: LoaderContext) => string | Promise<string>
+    transformHTML?: (source: string, req: LoaderContext) => string | Promise<string>
+    transformStyle?: (source: string, req: LoaderContext) => string | Promise<string>
     redirectHandler?: (type: 'script' | 'document' | 'style', notFoundPath: string) => string[]
 }
 

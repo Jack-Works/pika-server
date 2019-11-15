@@ -29,7 +29,7 @@ export default {
     },
     redirectHandler(type, path) {
         if (type !== 'script') return []
-        return [path + '.js', path + '/index.js']
+        return [path + '.js', path + '/index.js', path + '.mjs', path + '/index.mjs']
     },
 } as Loader
 type FlowAPI = {
