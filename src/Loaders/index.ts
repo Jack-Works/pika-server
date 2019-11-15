@@ -1,5 +1,3 @@
-import Koa from 'koa'
-
 export interface LoaderContext {
     path: string
     originalUrl: string

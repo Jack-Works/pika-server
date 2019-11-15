@@ -2,6 +2,5 @@
 
 // console.log(add(2, 3))
 
-console.log(function path(q: string) {
-    return import(Math.random() > 0.5 ? q : '/src/')
-})
+console.log(x => import(x))
+window.x = x => import(x)

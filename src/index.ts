@@ -72,6 +72,7 @@ app.use(KoaStatic(demoPath, { hidden: true }))
 import { exists } from 'fs'
 import { promisify } from 'util'
 import { join } from 'path'
+import { resolveNpmNamespace, nodeStyleResolution } from './Loaders/JavaScript-Like/NodeStyleResolution'
 const exist = promisify(exists)
 /**
  * Re-resolve path like folder import
@@ -87,6 +88,20 @@ app.use(async (ctx, next) => {
                     break searching
                 }
             }
+        }
+    }
+    return next()
+})
+
+/**
+ * Re-resolve node_modules path
+ */
+app.use(async (ctx, next) => {
+    if (ctx.response.status === 404) {
+        const secFetchDest: any = ctx.headers['sec-fetch-dest']
+        if (secFetchDest === 'script' && ctx.path.startsWith('/node_modules/')) {
+            const { subPath, fullModuleName } = resolveNpmNamespace(ctx.path.replace('/node_modules/', ''), demoPath)
+            if (subPath === '') ctx.redirect(nodeStyleResolution(fullModuleName, demoPath))
         }
     }
     return next()
