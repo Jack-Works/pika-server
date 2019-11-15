@@ -67,7 +67,7 @@ Reference: [JSON Module](https://github.com/whatwg/html/issues/4315).
 | --------- | ---- |
 | ES Import | ✔    |
 | SourceMap | ❌   |
-| freezed   | ❌   |
+| freezed   | ✔    |
 
 ### Import HTML-like types as HTML Module:
 
