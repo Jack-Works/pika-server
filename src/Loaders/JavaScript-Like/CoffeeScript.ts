@@ -1,6 +1,7 @@
 import { Loader } from '..'
 import { importGlobal } from '../../utils/import'
 import { isScriptLikeTarget } from '../../types'
+import { generateMonacoTemplate } from '../../features/monaco'
 
 export default {
     canHandle: 'text/coffeescript',
@@ -17,6 +18,7 @@ export default {
         if (!isScriptLikeTarget(type)) return []
         return [path + '.coffee']
     },
+    transformDocument: generateMonacoTemplate,
 } as Loader
 type CoffeeAPI = {
     compile(

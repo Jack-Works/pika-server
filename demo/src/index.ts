@@ -1,11 +1,5 @@
-async function main() {
-    // @ts-ignore
-    const monaco = await (import('monaco-editor') as Promise<typeof import('../node_modules/monaco-editor')>)
+console.log('Hello world!')
 
-    monaco.editor.create(document.getElementById('container'), {
-        value: ['function x() {', '\tconsole.log("Hello world!");', '}'].join('\n'),
-        language: 'javascript',
-        theme: matchMedia(`prefers-color-scheme: dark`) ? 'vs-dark' : 'vs',
-    })
+export default function<T extends number>(): T {
+    return Math.random() as T
 }
-main()

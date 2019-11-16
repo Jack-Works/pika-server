@@ -30,7 +30,8 @@
   "homepage": "https://github.com/Jack-Works/pika-server#readme",
   "dependencies": {
     "koa": "^2.11.0",
-    "koa-static": "^5.0.0"
+    "koa-static": "^5.0.0",
+    "monaco-editor": "^0.18.1"
   },
   "bin": {
     "pikasrv": "./dist/index.js"

@@ -19,7 +19,8 @@ import SCSS from './Loaders/CSS-Like/SCSS'
 import LESS from './Loaders/CSS-Like/LESS'
 import Stylus from './Loaders/CSS-Like/Stylus'
 import WebAssembly from './Loaders/WebAssembly'
-import { SecFetchDest, isScriptLikeTarget as isScriptLikeDest } from './types'
+import { SecFetchDest, isScriptLikeTarget as isScriptLikeDest, PikaContext } from './types'
+import MonacoMiddleware from './features/monaco'
 
 Loaders.add(CSSModule)
 Loaders.add(JSONLoader)
@@ -32,11 +33,17 @@ Loaders.add(LESS)
 Loaders.add(Stylus)
 Loaders.add(WebAssembly)
 
-const app = new Koa()
-
+const exist = promisify(exists)
 const demoPath = './demo/'
 
-app.use(async (ctx, next) => {
+const app = new Koa()
+app.use<{}, PikaContext>(async (ctx, next) => {
+    ctx.serveRoot = demoPath
+    ctx.servePath = ctx.path
+    return next()
+})
+
+app.use<{}, PikaContext>(async (ctx, next) => {
     await next()
     const secFetchDest: SecFetchDest = ctx.headers['sec-fetch-dest']
     const originalMineType = ctx.response.type
@@ -51,7 +58,7 @@ app.use(async (ctx, next) => {
             return source
         }
         const loaderCtx: LoaderContext = {
-            serveBasePath: demoPath,
+            serveBasePath: ctx.serveRoot,
             originalUrl: ctx.originalUrl,
             path: ctx.path,
             readAsString: readSource,
@@ -94,18 +101,28 @@ app.use(async (ctx, next) => {
     }
 })
 
-const exist = promisify(exists)
+app.use(MonacoMiddleware)
+
 /**
  * Re-resolve path like folder import
  */
-app.use(async (ctx, next) => {
+app.use<{}, PikaContext>(async (ctx, next) => {
     if (ctx.response.status === 404) {
         const secFetchDest: SecFetchDest = ctx.headers['sec-fetch-dest']
         searching: for (const loader of Loaders) {
             if (!loader.redirectHandler) continue
-            for (const path of loader.redirectHandler(secFetchDest, ctx.path)) {
-                if (await exist(join(demoPath, path))) {
-                    ctx.redirect(path)
+            const pathMap = (() => {
+                const map: [string, string][] = []
+                const servePathMap = loader.redirectHandler(secFetchDest, ctx.servePath)
+                const realPathMap = loader.redirectHandler(secFetchDest, ctx.path)
+                servePathMap.forEach((v, i) => map.push([v, realPathMap[i]]))
+                return new Map(map)
+            })()
+            for (const [mappedPath, realPath] of pathMap) {
+                const physicalPath = join(ctx.serveRoot, mappedPath)
+                if (await exist(physicalPath)) {
+                    ctx.redirect(realPath)
+
                     break searching
                 }
             }
@@ -127,12 +144,15 @@ app.use(async (ctx, next) => {
 /**
  * Re-resolve node_modules path
  */
-app.use(async (ctx, next) => {
+app.use<{}, PikaContext>(async (ctx, next) => {
     if (ctx.response.status === 404) {
         const secFetchDest: SecFetchDest = ctx.headers['sec-fetch-dest']
         if (isScriptLikeDest(secFetchDest) && ctx.path.startsWith('/node_modules/')) {
-            const { subPath, fullModuleName } = resolveNpmNamespace(ctx.path.replace('/node_modules/', ''), demoPath)
-            if (subPath === '') ctx.redirect(nodeStyleResolution(fullModuleName, demoPath))
+            const { subPath, fullModuleName } = resolveNpmNamespace(
+                ctx.path.replace('/node_modules/', ''),
+                ctx.serveRoot,
+            )
+            if (subPath === '') ctx.redirect(nodeStyleResolution(fullModuleName, ctx.serveRoot))
         }
     }
     return next()

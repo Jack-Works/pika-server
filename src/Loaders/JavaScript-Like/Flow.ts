@@ -1,6 +1,7 @@
 import { Loader } from '..'
 import { importGlobal } from '../../utils/import'
 import { isScriptLikeTarget } from '../../types'
+import { generateMonacoTemplate } from '../../features/monaco'
 
 export default {
     canHandle: async (mineType, ctx) => {
@@ -28,6 +29,7 @@ export default {
             return `export default undefined; throw new TypeError("To transform flow.js, install the flow-remote-types package\\n${e.message}")`
         }
     },
+    transformDocument: generateMonacoTemplate,
     redirectHandler(type, path) {
         if (!isScriptLikeTarget(type)) return []
         return [path + '.js', path + '/index.js', path + '.mjs', path + '/index.mjs']

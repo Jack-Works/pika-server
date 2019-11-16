@@ -41,3 +41,8 @@ export function isScriptLikeTarget(
             return false
     }
 }
+
+export interface PikaContext {
+    serveRoot: string
+    servePath: string
+}

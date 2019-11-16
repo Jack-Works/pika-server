@@ -3,6 +3,7 @@ import { importGlobal } from '../../utils/import'
 import { TransformationContext, SourceFile, Node, StringLiteral } from 'typescript'
 import { nodeStyleResolution } from './NodeStyleResolution'
 import { isScriptLikeTarget } from '../../types'
+import { generateMonacoTemplate } from '../../features/monaco'
 
 export default {
     // Yes but sad.
@@ -35,6 +36,7 @@ export default undefined`
         if (!isScriptLikeTarget(type)) return []
         return [path + '.tsx', path + '.ts', path + '/index.tsx', path + '/index.ts']
     },
+    transformDocument: generateMonacoTemplate,
 } as Loader
 
 function transformPath(ts: typeof import('typescript'), basePath: string) {
