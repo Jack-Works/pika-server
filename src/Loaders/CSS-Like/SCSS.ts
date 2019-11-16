@@ -1,6 +1,7 @@
 import { Loader } from '..'
 import { importGlobal } from '../../utils/import'
 import { promisify } from 'util'
+import CSSModule from './CSSModule'
 
 export default {
     canHandle: async x => x === 'text/x-scss' || x === 'text/x-sass',
@@ -22,5 +23,8 @@ export default {
         } catch (e) {
             return source + `\n/* Compile Error:\n${e.message} */`
         }
+    },
+    async transformESModule(source, ctx) {
+        return CSSModule.transformESModule!(await this.transformStyle!(source, ctx), ctx)
     },
 } as Loader

@@ -47,11 +47,13 @@ You can import a `.css` file as a [CSSStyleSheet](https://wicg.github.io/constru
 
 Reference: [CSS Module](https://github.com/w3c/webcomponents/issues/759).
 
+> It seems there is no spec for CSS Module now.
+
 |                           | CSS | Less.js | SCSS | Stylus |
 | ------------------------- | --- | ------- | ---- | ------ |
 | `<link>` loadable         | ✔   | ✔       | ✔    | ✔      |
 | SourceMap (`<link>`)      | ✔   | ✔       | ✔    | ❌     |
-| Import as CSSStyleSheet   | ✔   | ❌      | ❌   | ❌     |
+| Import as CSSStyleSheet   | ✔   | ✔       | ✔    | ✔      |
 | SourceMap (import)        | ❌  | ❌      | ❌   | ❌     |
 | Their own `import` syntax | ✔   | ❌      | ❌   | ❌     |
 

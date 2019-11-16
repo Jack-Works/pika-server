@@ -1,8 +1,9 @@
-import * as math from './math'
-console.log(math)
+// import * as math from './math'
+// console.log(math)
 
-import json from '../node_modules/lodash-es/package.json'
-console.log(json)
+// import json from '../node_modules/lodash-es/package.json'
+import css from '../style.scss'
+console.log(css)
 
 async function wasm() {
     let memory: Uint8Array
