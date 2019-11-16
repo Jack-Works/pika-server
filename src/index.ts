@@ -4,6 +4,11 @@ import KoaStatic from 'koa-static'
 import { Loaders, LoaderContext } from './Loaders'
 import { ReadStreamToString } from './utils/ReadStreamToString'
 
+import { exists } from 'fs'
+import { promisify } from 'util'
+import { join } from 'path'
+import { resolveNpmNamespace, nodeStyleResolution } from './Loaders/JavaScript-Like/NodeStyleResolution'
+
 import JSONLoader from './Loaders/JSONModule'
 import MarkdownLoader from './Loaders/MarkdownLoader'
 import CSSModule from './Loaders/CSS-Like/CSSModule'
@@ -13,6 +18,8 @@ import Flow from './Loaders/JavaScript-Like/Flow'
 import SCSS from './Loaders/CSS-Like/SCSS'
 import LESS from './Loaders/CSS-Like/LESS'
 import Stylus from './Loaders/CSS-Like/Stylus'
+import WebAssembly from './Loaders/WebAssembly'
+
 Loaders.add(CSSModule)
 Loaders.add(JSONLoader)
 Loaders.add(TypeScript)
@@ -22,6 +29,7 @@ Loaders.add(Flow)
 Loaders.add(SCSS)
 Loaders.add(LESS)
 Loaders.add(Stylus)
+Loaders.add(WebAssembly)
 
 const app = new Koa()
 
@@ -35,26 +43,34 @@ app.use(async (ctx, next) => {
             loader.canHandle = async (mineType: string) => _ === mineType
         }
         let source: string
-        async function getSource() {
+        async function readSource() {
             if (typeof source === 'undefined') return (source = await ReadStreamToString(ctx.body))
             return source
         }
-        if (await loader.canHandle(originalMineType, getSource)) {
-            const loaderCtx: LoaderContext = { serveBasePath: demoPath, originalUrl: ctx.originalUrl, path: ctx.path }
+        const loaderCtx: LoaderContext = {
+            serveBasePath: demoPath,
+            originalUrl: ctx.originalUrl,
+            path: ctx.path,
+            readAsString: readSource,
+            setMineType(type) {
+                ctx.response.type = type
+            },
+        }
+        if (await loader.canHandle(originalMineType, loaderCtx)) {
             if (secFetchDest === 'script' && loader.transformESModule) {
-                ctx.body = await loader.transformESModule(await getSource(), loaderCtx)
+                ctx.body = await loader.transformESModule(await readSource(), loaderCtx)
                 ctx.response.type = '.js'
                 break
             } else if (secFetchDest === 'document' && loader.transformHTML) {
-                ctx.body = await loader.transformHTML(await getSource(), loaderCtx)
+                ctx.body = await loader.transformHTML(await readSource(), loaderCtx)
                 ctx.response.type = '.html'
                 break
             } else if (secFetchDest === 'style' && loader.transformStyle) {
-                ctx.body = await loader.transformStyle(await getSource(), loaderCtx)
+                ctx.body = await loader.transformStyle(await readSource(), loaderCtx)
                 ctx.response.type = '.css'
                 break
             } else {
-                ctx.body = await getSource()
+                ctx.body = await readSource()
             }
         } else {
             // @ts-ignore
@@ -69,10 +85,6 @@ const demoPath = './demo/'
 
 app.use(KoaStatic(demoPath, { hidden: true }))
 
-import { exists } from 'fs'
-import { promisify } from 'util'
-import { join } from 'path'
-import { resolveNpmNamespace, nodeStyleResolution } from './Loaders/JavaScript-Like/NodeStyleResolution'
 const exist = promisify(exists)
 /**
  * Re-resolve path like folder import

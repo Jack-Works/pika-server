@@ -2,9 +2,9 @@ import { Loader } from '..'
 import { importGlobal } from '../../utils/import'
 
 export default {
-    canHandle: async (mineType, getSource) => {
+    canHandle: async (mineType, ctx) => {
         if (mineType === 'application/javascript') {
-            const x = await getSource()
+            const x = await ctx.readAsString()
             if (x.indexOf(`@flow`) !== -1) return true
             return false
         }
