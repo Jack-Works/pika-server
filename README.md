@@ -21,8 +21,8 @@ A light server built for ES Modules.
 ### TL DR
 
 -   Import as ESModules: ECMAScript, flow, TypeScript, CoffeeScript
--   Import as ESModules\*: HTML, CSS, JSON, WebAssembly
--   Compile-while-serve: flow, TypeScript, CoffeeScript, Markdown, Less.js, SCSS, Stylus
+-   Import as ESModules\*: CSS, JSON
+-   Compile-while-serve: flow, TypeScript, CoffeeScript, Markdown, Less.js, SCSS, Stylus, JSONC, WebAssemblyText
 
 ### Import JavaScript-like types:
 
@@ -57,23 +57,18 @@ Reference: [CSS Module](https://github.com/w3c/webcomponents/issues/759).
 
 ### Import JSON-like types as JSON Module:
 
-You can import a `.json` file as an freeze object.
+> TODO: support? yaml, toml, json5/6, cson
 
-> TODO: support? yaml, toml, jsonc, json5/6, cson
+You can import a `.json` file.
 
-Reference: [JSON Module](https://github.com/whatwg/html/issues/4315).
+Reference: [JSON Module](https://github.com/whatwg/html/issues/4315), [specification](https://whatpr.org/html/4407/38c50c4...2aa1aad/webappapis.html#creating-scripts)
 
-Spec: https://whatpr.org/html/4407/38c50c4...2aa1aad/webappapis.html#creating-scripts
+> Caution: This spec is reverted due to security issue: [HTML, CSS, and JSON modules shouldn't solely rely on MIME type to change parsing behavior](https://github.com/w3c/webcomponents/issues/839)
 
-> Caution: This spec is reverted due to security issue.
-
-[HTML, CSS, and JSON modules shouldn't solely rely on MIME type to change parsing behavior](https://github.com/w3c/webcomponents/issues/839)
-
-|           | JSON |
-| --------- | ---- |
-| ES Import | ✔    |
-| SourceMap | ❌   |
-| freezed   | ✔    |
+|           | JSON | JSONC |
+| --------- | ---- | ----- |
+| ES Import | ✔    | ✔     |
+| SourceMap | ❌   | ❌    |
 
 ### Import HTML-like types as HTML Module:
 
