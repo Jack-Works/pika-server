@@ -81,11 +81,12 @@ You can import a `.wasm` file as a WebAssembly Module instance.
 
 Reference: [WebAssembly Module](https://github.com/WebAssembly/esm-integration/tree/master/proposals/esm-integration)
 
-|                                   | WebAssembly |
-| --------------------------------- | ----------- |
-| ES Import                         | ❌          |
-| ES Import without Top-Level await | ❌          |
-| SourceMap                         | ❌          |
+|                               | .wasm | .wat/.wast |
+| ----------------------------- | ----- | ---------- |
+| Import as WebAssembly         | ✔     | ✔          |
+| ES Import                     | ❌    | ❌         |
+| SourceMap (import)            | ❌    | ❌         |
+| ES Import w/o Top-Level await | ❌    | ❌         |
 
 ### Notes:
 

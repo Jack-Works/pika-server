@@ -67,17 +67,19 @@ app.use(async (ctx, next) => {
         }
         if (await loader.canHandle(originalMineType, loaderCtx)) {
             if (secFetchDest === 'script' && loader.transformESModule) {
-                ctx.body = await loader.transformESModule(await readSource(), loaderCtx)
                 ctx.response.type = '.js'
+                ctx.body = await loader.transformESModule(await readSource(), loaderCtx)
                 break
             } else if (secFetchDest === 'document' && loader.transformDocument) {
-                ctx.body = await loader.transformDocument(await readSource(), loaderCtx)
                 ctx.response.type = '.html'
+                ctx.body = await loader.transformDocument(await readSource(), loaderCtx)
                 break
             } else if (secFetchDest === 'style' && loader.transformStyle) {
-                ctx.body = await loader.transformStyle(await readSource(), loaderCtx)
                 ctx.response.type = '.css'
+                ctx.body = await loader.transformStyle(await readSource(), loaderCtx)
                 break
+            } else if (loader.transform) {
+                ctx.body = await loader.transform(loaderCtx)
             } else {
                 ctx.body = await readSource()
             }

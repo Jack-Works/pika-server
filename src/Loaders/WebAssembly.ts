@@ -1,13 +1,16 @@
 import { Loader } from '.'
+import { importGlobal } from '../utils/import'
+import { ReadStream } from 'fs'
 
 export default {
     canHandle: async (mineType, ctx) => {
-        const result = ['.wat', '.wast', '.wasm'].some(x => ctx.path.endsWith(x))
-        if (result === true) ctx.mineType = 'application/wasm'
-        return result
+        return ['.wat', '.wast', '.wasm'].some(x => ctx.path.endsWith(x))
     },
-    transform(ctx) {
+    async transform(ctx) {
+        ctx.mineType = 'application/wasm'
         if (ctx.path.endsWith('.wasm')) return ctx.readAsStream()
-        return ''
+        const wabt = (await importGlobal<() => typeof import('wabt')>('wabt'))()
+        const buffer = wabt.parseWat(ctx.path, await ctx.readAsString()).toBinary({ write_debug_names: true }).buffer
+        return new Buffer(buffer)
     },
 } as Loader
