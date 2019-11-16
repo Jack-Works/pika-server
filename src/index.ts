@@ -4,7 +4,7 @@ import KoaStatic from 'koa-static'
 import { Loaders, LoaderContext } from './Loaders'
 import { ReadStreamToString } from './utils/ReadStreamToString'
 
-import { exists } from 'fs'
+import { exists, ReadStream } from 'fs'
 import { promisify } from 'util'
 import { join } from 'path'
 import { resolveNpmNamespace, nodeStyleResolution } from './Loaders/JavaScript-Like/NodeStyleResolution'
@@ -53,8 +53,16 @@ app.use(async (ctx, next) => {
             originalUrl: ctx.originalUrl,
             path: ctx.path,
             readAsString: readSource,
-            setMineType(type) {
+            secFetchDest: secFetchDest,
+            get mineType() {
+                return ctx.response.type
+            },
+            set mineType(type) {
                 ctx.response.type = type
+            },
+            async readAsStream() {
+                if (ctx.body instanceof ReadStream) return ctx.body
+                else throw new TypeError('Invalid internal state')
             },
         }
         if (await loader.canHandle(originalMineType, loaderCtx)) {
@@ -62,8 +70,8 @@ app.use(async (ctx, next) => {
                 ctx.body = await loader.transformESModule(await readSource(), loaderCtx)
                 ctx.response.type = '.js'
                 break
-            } else if (secFetchDest === 'document' && loader.transformHTML) {
-                ctx.body = await loader.transformHTML(await readSource(), loaderCtx)
+            } else if (secFetchDest === 'document' && loader.transformDocument) {
+                ctx.body = await loader.transformDocument(await readSource(), loaderCtx)
                 ctx.response.type = '.html'
                 break
             } else if (secFetchDest === 'style' && loader.transformStyle) {

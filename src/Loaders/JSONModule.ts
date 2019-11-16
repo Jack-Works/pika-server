@@ -13,6 +13,6 @@ export default {
     canHandle: 'application/json',
     transformESModule: x => `export default deepFreeze(${x})
 ${deepFreeze.toString()}`,
-    transformHTML: x =>
+    transformDocument: x =>
         `<meta charset="UTF-8" /><pre><code>${JSON.stringify(JSON.parse(x), undefined, 4)}</code></pre>`,
 } as Loader

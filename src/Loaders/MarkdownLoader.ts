@@ -4,7 +4,7 @@ import { importGlobal } from '../utils/import'
 const msg = 'To render markdown, you need to have install package `markdown-it`'
 export default {
     canHandle: 'text/markdown',
-    async transformHTML(source) {
+    async transformDocument(source) {
         try {
             const md = await importGlobal<typeof import('markdown-it')>('markdown-it')
             return `<meta charset="UTF-8" /><article class="markdown-body">
