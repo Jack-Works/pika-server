@@ -2,6 +2,7 @@ import { Loader } from '..'
 import { importGlobal } from '../../utils/import'
 import { TransformationContext, SourceFile, Node, StringLiteral } from 'typescript'
 import { nodeStyleResolution } from './NodeStyleResolution'
+import { isScriptLikeTarget } from '../../types'
 
 export default {
     // Yes but sad.
@@ -31,7 +32,7 @@ export default undefined`
         }
     },
     redirectHandler(type, path) {
-        if (type !== 'script') return []
+        if (!isScriptLikeTarget(type)) return []
         return [path + '.tsx', path + '.ts', path + '/index.tsx', path + '/index.ts']
     },
 } as Loader

@@ -1,5 +1,6 @@
 import { Loader } from '..'
 import { importGlobal } from '../../utils/import'
+import { isScriptLikeTarget } from '../../types'
 
 export default {
     canHandle: async (mineType, ctx) => {
@@ -28,7 +29,7 @@ export default {
         }
     },
     redirectHandler(type, path) {
-        if (type !== 'script') return []
+        if (!isScriptLikeTarget(type)) return []
         return [path + '.js', path + '/index.js', path + '.mjs', path + '/index.mjs']
     },
 } as Loader

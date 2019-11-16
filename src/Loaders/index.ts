@@ -1,3 +1,5 @@
+import { SecFetchDest } from '../types'
+
 export interface LoaderContext {
     path: string
     originalUrl: string
@@ -10,7 +12,7 @@ export interface Loader {
     transformESModule?: (source: string, req: LoaderContext) => string | Promise<string>
     transformHTML?: (source: string, req: LoaderContext) => string | Promise<string>
     transformStyle?: (source: string, req: LoaderContext) => string | Promise<string>
-    redirectHandler?: (type: 'script' | 'document' | 'style', notFoundPath: string) => string[]
+    redirectHandler?: (type: SecFetchDest, notFoundPath: string) => string[]
 }
 
 export const Loaders = new Set<Loader>()

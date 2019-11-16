@@ -1,5 +1,6 @@
 import { Loader } from '..'
 import { importGlobal } from '../../utils/import'
+import { isScriptLikeTarget } from '../../types'
 
 export default {
     canHandle: 'text/coffeescript',
@@ -13,7 +14,7 @@ export default {
         }
     },
     redirectHandler(type, path) {
-        if (type !== 'script') return []
+        if (!isScriptLikeTarget(type)) return []
         return [path + '.coffee']
     },
 } as Loader

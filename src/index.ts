@@ -19,6 +19,7 @@ import SCSS from './Loaders/CSS-Like/SCSS'
 import LESS from './Loaders/CSS-Like/LESS'
 import Stylus from './Loaders/CSS-Like/Stylus'
 import WebAssembly from './Loaders/WebAssembly'
+import { SecFetchDest, isScriptLikeTarget as isScriptLikeDest } from './types'
 
 Loaders.add(CSSModule)
 Loaders.add(JSONLoader)
@@ -35,7 +36,7 @@ const app = new Koa()
 
 app.use(async (ctx, next) => {
     await next()
-    const secFetchDest: string = ctx.headers['sec-fetch-dest']
+    const secFetchDest: SecFetchDest = ctx.headers['sec-fetch-dest']
     const originalMineType = ctx.response.type
     for (const loader of Loaders) {
         if (typeof loader.canHandle === 'string') {
@@ -91,7 +92,7 @@ const exist = promisify(exists)
  */
 app.use(async (ctx, next) => {
     if (ctx.response.status === 404) {
-        const secFetchDest: any = ctx.headers['sec-fetch-dest']
+        const secFetchDest: SecFetchDest = ctx.headers['sec-fetch-dest']
         searching: for (const loader of Loaders) {
             if (!loader.redirectHandler) continue
             for (const path of loader.redirectHandler(secFetchDest, ctx.path)) {
@@ -110,8 +111,8 @@ app.use(async (ctx, next) => {
  */
 app.use(async (ctx, next) => {
     if (ctx.response.status === 404) {
-        const secFetchDest: any = ctx.headers['sec-fetch-dest']
-        if (secFetchDest === 'script' && ctx.path.startsWith('/node_modules/')) {
+        const secFetchDest: SecFetchDest = ctx.headers['sec-fetch-dest']
+        if (isScriptLikeDest(secFetchDest) && ctx.path.startsWith('/node_modules/')) {
             const { subPath, fullModuleName } = resolveNpmNamespace(ctx.path.replace('/node_modules/', ''), demoPath)
             if (subPath === '') ctx.redirect(nodeStyleResolution(fullModuleName, demoPath))
         }

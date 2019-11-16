@@ -25,3 +25,19 @@ export type SecFetchDest =
     | 'worker'
     | 'xslt'
     | 'nested-document'
+
+export function isScriptLikeTarget(
+    target: SecFetchDest,
+): target is 'audioworklet' | 'paintworklet' | 'script' | 'serviceworker' | 'sharedworker' | 'worker' {
+    switch (target) {
+        case 'audioworklet':
+        case 'paintworklet':
+        case 'script':
+        case 'serviceworker':
+        case 'sharedworker':
+        case 'worker':
+            return true
+        default:
+            return false
+    }
+}
