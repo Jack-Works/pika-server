@@ -1,19 +1,18 @@
 import { Loader } from '..'
 
-function create(x: string) {
-    const css = new CSSStyleSheet()
-    const hasImport = x.includes('@import')
-    // @ts-ignore
-    if (hasImport) css.replace(x)
-    // @ts-ignore
-    else css.replaceSync(x)
-    return css
-}
-
 export default {
     canHandle: 'text/css',
     transformESModule(x) {
-        return `export default ${create.name}(${JSON.stringify(x)})
-${create.toString()}`
+        return `export default create(${JSON.stringify(x)})
+function create(x) {
+    const css = new CSSStyleSheet()
+    const hasImport = x.includes('@import')
+    if (hasImport) css.replace(x)
+    else css.replaceSync(x)
+    if (new URL(import.meta.url).pathname.startsWith('/node_modules/monaco-editor/')) {
+        document.adoptedStyleSheets = [...document.adoptedStyleSheets, css]
+    }
+    return css
+}`
     },
 } as Loader

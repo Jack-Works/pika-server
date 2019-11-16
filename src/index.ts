@@ -34,6 +34,8 @@ Loaders.add(WebAssembly)
 
 const app = new Koa()
 
+const demoPath = './demo/'
+
 app.use(async (ctx, next) => {
     await next()
     const secFetchDest: SecFetchDest = ctx.headers['sec-fetch-dest']
@@ -92,10 +94,6 @@ app.use(async (ctx, next) => {
     }
 })
 
-const demoPath = './demo/'
-
-app.use(KoaStatic(demoPath, { hidden: true }))
-
 const exist = promisify(exists)
 /**
  * Re-resolve path like folder import
@@ -117,6 +115,16 @@ app.use(async (ctx, next) => {
 })
 
 /**
+ * Cache for node_modules
+ */
+app.use(async (ctx, next) => {
+    await next()
+    if (ctx.path.startsWith('/node_modules/') && ctx.response.status < 400) {
+        ctx.set('Cache-Control', 'public immutable max-age=604800')
+    }
+})
+
+/**
  * Re-resolve node_modules path
  */
 app.use(async (ctx, next) => {
@@ -129,6 +137,8 @@ app.use(async (ctx, next) => {
     }
     return next()
 })
+
+app.use(KoaStatic(demoPath, { hidden: true }))
 
 app.listen({ port: 5000 })
 

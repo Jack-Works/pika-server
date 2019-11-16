@@ -1,35 +1,11 @@
-// import * as math from './math'
-// console.log(math)
+async function main() {
+    // @ts-ignore
+    const monaco = await (import('monaco-editor') as Promise<typeof import('../node_modules/monaco-editor')>)
 
-// import json from '../node_modules/lodash-es/package.json'
-import css from '../style.scss'
-console.log(css)
-
-async function wasm() {
-    let memory: Uint8Array
-    fetch('../other/hello.wat')
-        .then(response => response.arrayBuffer())
-        .then(bytes =>
-            WebAssembly.instantiate(bytes, {
-                env: {
-                    jsprint: function jsprint(byteOffset) {
-                        var string = ''
-                        var a = new Uint8Array(memory.buffer)
-                        for (var i = byteOffset; a[i]; i++) {
-                            string += String.fromCharCode(a[i])
-                        }
-                        const code = document.createElement('code')
-                        code.innerText = string
-                        document.body.appendChild(code)
-                    },
-                },
-            }),
-        )
-        .then(results => {
-            const instance = results.instance
-            memory = instance.exports.pagememory
-            instance.exports.helloworld()
-        })
-        .catch(console.error)
+    monaco.editor.create(document.getElementById('container'), {
+        value: ['function x() {', '\tconsole.log("Hello world!");', '}'].join('\n'),
+        language: 'javascript',
+        theme: matchMedia(`prefers-color-scheme: dark`) ? 'vs-dark' : 'vs',
+    })
 }
-wasm()
+main()
