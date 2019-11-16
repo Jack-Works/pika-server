@@ -11,6 +11,6 @@ export default {
         if (ctx.path.endsWith('.wasm')) return ctx.readAsStream()
         const wabt = (await importGlobal<() => typeof import('wabt')>('wabt'))()
         const buffer = wabt.parseWat(ctx.path, await ctx.readAsString()).toBinary({ write_debug_names: true }).buffer
-        return new Buffer(buffer)
+        return Buffer.from(buffer)
     },
 } as Loader

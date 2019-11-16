@@ -63,6 +63,12 @@ You can import a `.json` file as an freeze object.
 
 Reference: [JSON Module](https://github.com/whatwg/html/issues/4315).
 
+Spec: https://whatpr.org/html/4407/38c50c4...2aa1aad/webappapis.html#creating-scripts
+
+> Caution: This spec is reverted due to security issue.
+
+[HTML, CSS, and JSON modules shouldn't solely rely on MIME type to change parsing behavior](https://github.com/w3c/webcomponents/issues/839)
+
 |           | JSON |
 | --------- | ---- |
 | ES Import | ✔    |
