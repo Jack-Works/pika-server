@@ -36,20 +36,50 @@ export function generateMonacoTemplate(source: string, ctx: LoaderContext) {
     return `<!DOCTYPE html>
     <html lang="en">
         <head>
+            <link rel="stylesheet" href="https://unpkg.com/highlight.js@9.16.2/styles/solarized-dark.css" media="(prefers-color-scheme: dark)">
+            <link rel="stylesheet" href="https://unpkg.com/highlight.js@9.16.2/styles/solarized-light.css" media="(prefers-color-scheme: light)">
             <meta charset="UTF-8" />
-            <style>body { margin: 0; }</style>
+            <style>
+                body { margin: 0; }
+                * { box-sizing: border-box; }
+                #code { height: 100vh; padding: 1em; zoom: 1.2; }
+                pre { margin: 0; }
+            </style>
         </head>
         <body>
+            <pre><code id="code"></code></pre>
             <script type="module">
             ${monacoLoader.toString()}
-            monacoLoader(atob("${btoa(source)}"), import('${pkg}/esm/vs/editor/editor.main.js'))
+            monacoLoader(atob("${btoa(source)}"), () => import('${pkg}/esm/vs/editor/editor.main.js'))
             </script>
         </body>
     </html>
     `
 }
 
-async function monacoLoader(source: string, _monaco: Promise<typeof import('monaco-editor')>) {
+async function monacoLoader(source: string, _monaco: () => Promise<typeof import('monaco-editor')>) {
+    const languageMap = {
+        tsx: 'typescript',
+        ts: 'typescript',
+        js: 'javascript',
+        jsx: 'typescript',
+        css: 'css',
+        json: 'json',
+    }
+    const [, ext] = location.pathname.match(/.+\.(.+)$/) || []
+    const lang = languageMap[ext as keyof typeof languageMap]
+    if (lang === undefined) {
+        const code = document.querySelector('code')!
+        code.innerText = source
+        const script = document.createElement('script')
+        script.src = `https://unpkg.com/highlight.js@9.16.2/lib/highlight.js`
+        document.body.appendChild(script)
+        script.onload = () => {
+            // @ts-ignore
+            hljs.highlightBlock(code)
+        }
+        return
+    }
     // @ts-ignore
     globalThis.MonacoEnvironment = {
         getWorkerUrl(workerID: string, label: string) {
@@ -77,19 +107,10 @@ async function monacoLoader(source: string, _monaco: Promise<typeof import('mona
             return Reflect.construct(target, [args[0], { type: 'module' }], newTarget)
         },
     })
-    const monaco = await _monaco
-    const languageMap = {
-        tsx: 'typescript',
-        ts: 'typescript',
-        js: 'javascript',
-        jsx: 'typescript',
-        css: 'css',
-        json: 'json',
-    }
-    const [, ext] = location.pathname.match(/.+\.(.+)$/) || []
+    const monaco = await _monaco()
     monaco.editor.create(editor, {
         value: source,
-        language: languageMap[ext as keyof typeof languageMap],
+        language: lang,
         theme: matchMedia(`prefers-color-scheme: dark`) ? 'vs-dark' : 'vs',
     })
 }
