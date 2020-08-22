@@ -1,13 +1,10 @@
 #!/usr/bin/env node
 import Koa from 'koa'
 import KoaStatic from 'koa-static'
-import { Loaders, LoaderContext } from './Loaders'
-import { ReadStreamToString } from './utils/ReadStreamToString'
+import { Loaders } from './Loaders'
 
-import { exists, ReadStream } from 'fs'
+import { exists } from 'fs'
 import { promisify } from 'util'
-import { join } from 'path'
-import { resolveNpmNamespace, nodeStyleResolution } from './Loaders/JavaScript-Like/NodeStyleResolution'
 
 import JSONLoader from './Loaders/JSONModule'
 import MarkdownLoader from './Loaders/MarkdownLoader'
@@ -19,8 +16,12 @@ import SCSS from './Loaders/CSS-Like/SCSS'
 import LESS from './Loaders/CSS-Like/LESS'
 import Stylus from './Loaders/CSS-Like/Stylus'
 import WebAssembly from './Loaders/WebAssembly'
-import { SecFetchDest, isScriptLikeTarget as isScriptLikeDest, PikaContext } from './types'
+import { PikaContext } from './types'
 import MonacoMiddleware from './features/monaco'
+import { PikaLoader } from './features/PikaLoader'
+import { loaderRedirectHandler } from './features/loaderRedirectHandler'
+import { nodeModuleCache } from './features/nodeModuleCache'
+import { nodeStyleResolutionMiddleware } from './features/nodeStyleResolutionMiddleware'
 
 Loaders.add(CSSModule)
 Loaders.add(JSONLoader)
@@ -33,7 +34,7 @@ Loaders.add(LESS)
 Loaders.add(Stylus)
 Loaders.add(WebAssembly)
 
-const exist = promisify(exists)
+export const exist = promisify(exists)
 const demoPath = './demo/'
 
 const app = new Koa()
@@ -43,123 +44,12 @@ app.use<{}, PikaContext>(async (ctx, next) => {
     return next()
 })
 
-app.use<{}, PikaContext>(async (ctx, next) => {
-    await next()
-    const secFetchDest: SecFetchDest = ctx.headers['sec-fetch-dest']
-    const originalMineType = ctx.response.type
-    for (const loader of Loaders) {
-        if (typeof loader.canHandle === 'string') {
-            const _ = loader.canHandle
-            loader.canHandle = async (mineType: string) => _ === mineType
-        }
-        let source: string
-        async function readSource() {
-            if (typeof source === 'undefined') return (source = await ReadStreamToString(ctx.body))
-            return source
-        }
-        const loaderCtx: LoaderContext = {
-            serveBasePath: ctx.serveRoot,
-            originalUrl: ctx.originalUrl,
-            path: ctx.path,
-            readAsString: readSource,
-            secFetchDest: secFetchDest,
-            get mineType() {
-                return ctx.response.type
-            },
-            set mineType(type) {
-                ctx.response.type = type
-            },
-            async readAsStream() {
-                if (ctx.body instanceof ReadStream) return ctx.body
-                else throw new TypeError('Invalid internal state')
-            },
-        }
-        if (await loader.canHandle(originalMineType, loaderCtx)) {
-            if (secFetchDest === 'script' && loader.transformESModule) {
-                ctx.response.type = '.js'
-                ctx.body = await loader.transformESModule(await readSource(), loaderCtx)
-                break
-            } else if (secFetchDest === 'document' && loader.transformDocument) {
-                ctx.response.type = '.html'
-                ctx.body = await loader.transformDocument(await readSource(), loaderCtx)
-                break
-            } else if (secFetchDest === 'style' && loader.transformStyle) {
-                ctx.response.type = '.css'
-                ctx.body = await loader.transformStyle(await readSource(), loaderCtx)
-                break
-            } else if (loader.transform) {
-                ctx.body = await loader.transform(loaderCtx)
-            } else {
-                ctx.body = await readSource()
-            }
-        } else {
-            // @ts-ignore
-            if (typeof source !== 'undefined') {
-                ctx.body = source
-            }
-        }
-    }
-})
-
+app.use(PikaLoader)
 app.use(MonacoMiddleware)
-
-/**
- * Re-resolve path like folder import
- */
-app.use<{}, PikaContext>(async (ctx, next) => {
-    if (ctx.response.status === 404) {
-        const secFetchDest: SecFetchDest = ctx.headers['sec-fetch-dest']
-        searching: for (const loader of Loaders) {
-            if (!loader.redirectHandler) continue
-            const pathMap = (() => {
-                const map: [string, string][] = []
-                const servePathMap = loader.redirectHandler(secFetchDest, ctx.servePath)
-                const realPathMap = loader.redirectHandler(secFetchDest, ctx.path)
-                servePathMap.forEach((v, i) => map.push([v, realPathMap[i]]))
-                return new Map(map)
-            })()
-            for (const [mappedPath, realPath] of pathMap) {
-                const physicalPath = join(ctx.serveRoot, mappedPath)
-                if (await exist(physicalPath)) {
-                    ctx.redirect(realPath)
-
-                    break searching
-                }
-            }
-        }
-    }
-    return next()
-})
-
-/**
- * Cache for node_modules
- */
-app.use(async (ctx, next) => {
-    await next()
-    if (ctx.path.startsWith('/node_modules/') && ctx.response.status < 400) {
-        ctx.set('Cache-Control', 'public immutable max-age=604800')
-    }
-})
-
-/**
- * Re-resolve node_modules path
- */
-app.use<{}, PikaContext>(async (ctx, next) => {
-    if (ctx.response.status === 404) {
-        const secFetchDest: SecFetchDest = ctx.headers['sec-fetch-dest']
-        if (isScriptLikeDest(secFetchDest) && ctx.path.startsWith('/node_modules/')) {
-            const { subPath, fullModuleName } = resolveNpmNamespace(
-                ctx.path.replace('/node_modules/', ''),
-                ctx.serveRoot,
-            )
-            if (subPath === '') ctx.redirect(nodeStyleResolution(fullModuleName, ctx.serveRoot))
-        }
-    }
-    return next()
-})
-
+app.use(loaderRedirectHandler)
+app.use(nodeModuleCache)
+app.use(nodeStyleResolutionMiddleware)
 app.use(KoaStatic(demoPath, { hidden: true }))
-
 app.listen({ port: 5000 })
 
 // Polyfill
